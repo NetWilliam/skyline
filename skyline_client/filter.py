@@ -208,11 +208,11 @@ def filter_func(monitor_conf, warning_conf):
 
 def gather_func(monitor_conf):
     dir = os.getcwd()
-    gather_dir = "%s/skyline-client/gather.py" % dir
+    gather_dir = "%s/skyline_client/gather.py" % dir
     subprocess.call(["python", gather_dir, monitor_conf])
 
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) >= 3:
         how_to_use()
     if len(sys.argv) != 3:
@@ -231,3 +231,7 @@ if __name__ == "__main__":
     # if any of this two threads quit, alert the warning and quit the whole program
     p_gather.join()
     p_filter.join()
+
+
+if __name__ == "__main__":
+    main()

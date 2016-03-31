@@ -40,7 +40,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
-    install_requires=['gevent', 'simplejson', 'pyzmq', 'requests', 'jsonchema',
+    install_requires=['gevent', 'simplejson', 'pyzmq', 'requests', 'jsonschema',
                       'pyinotify', 'six', 'ply', 'functools32'],
     keywords='skyline monitor',
     include_package_data=True

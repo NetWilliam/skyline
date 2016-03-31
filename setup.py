@@ -25,6 +25,10 @@ setup(
     author_email='liuweibo@xiachufang.com',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
+    entry_points={
+        "console_scripts": ["skyline = skyline_client:main", "skymonitor = skyline_client:main"]
+    },
+
     license='MIT',
     classifiers=[
         'Development Status :: 3 - Alpha',

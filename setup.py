@@ -23,7 +23,7 @@ setup(
     # Author details
     author='liuweibo',
     author_email='liuweibo@xiachufang.com',
-    packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    packages=find_packages(exclude=['tmp', 'test']),
 
     entry_points={
         "console_scripts": ["skyline = skyline_client:main", "skymonitor = skyline_client:main"]

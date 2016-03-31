@@ -2,4 +2,4 @@
 
 if __name__ == "__main__":
     from skyline_client import main
-    return main()
+    main()

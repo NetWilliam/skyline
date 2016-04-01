@@ -3,7 +3,6 @@
 
 import os
 import re
-import sys
 import simplejson
 import time
 import pyinotify
@@ -209,14 +208,4 @@ def verify_warning_conf(conf_path):
             f = warning["warning_filter"]
             get_filter_numerator_and_denominator(f)
 
-    #print "warning verify done"
     return variable_list
-
-
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print "usage: "
-    #print sys.argv
-    #print verify_monitor_conf(sys.argv[1])
-    #print verify_warning_conf(sys.argv[1])
-    print get_warnings(sys.argv[1])

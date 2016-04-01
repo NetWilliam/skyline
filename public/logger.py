@@ -53,11 +53,3 @@ def syslogger_handler(path, loglevel=logging.INFO):
     syslog.setLevel(loglevel)
 
     return syslog
-
-
-
-
-a=1
-
-
-

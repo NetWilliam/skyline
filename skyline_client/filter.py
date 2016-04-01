@@ -7,7 +7,6 @@ monkey.patch_all()
 import re
 import sys
 import time
-import requests
 import os
 import subprocess
 from collections import deque, namedtuple
@@ -49,7 +48,6 @@ class MonitorWorker(object):
             log_message = self.sub.sub_message(self.sub_idx)
             result = self.pattern.search(log_message)
             if not result:
-                #print "not match:", self.match_str, " log:", log_message
                 continue
             if result.groups():
                 result = result.group(1)
@@ -150,7 +148,6 @@ class WarningWorker(object):
                     self.send_warning()
 
     def send_warning(self):
-        print "----------------------------------warning is triggered!-----------------------------------------------"
         email_list = ";".join(get_email_list(self._alert_name))
         phone_list = (get_phone_list(self._alert_name))
         title = "warning"
@@ -165,9 +162,7 @@ class WarningWorker(object):
             "email_addrs": email_list
         }
 
-        #resp = requests.get(self.alert_url, params=params) # noqa
         alert.send_alert(**params)
-        print "----------------------------------warning send done!-----------------------------------------------"
 
 
 def test_worker():
@@ -200,8 +195,6 @@ def filter_func(monitor_conf, warning_conf):
         gevent.spawn(mw.work) for mw in mw_list
     ] + [
         gevent.spawn(ww.work) for ww in ww_list
-    ] + [
-        gevent.spawn(test_worker)
     ]
     gevent.joinall(jobs)
 

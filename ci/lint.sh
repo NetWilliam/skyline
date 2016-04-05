@@ -9,8 +9,4 @@ echo "python code check start"
 $DIR/lint_py.sh
 echo "python code check end"
 
-echo "js code check start"
-$DIR/lint_js.sh
-echo "js code check end"
-
 echo "check code style done"

@@ -26,7 +26,8 @@ setup(
     packages=find_packages(exclude=['tmp', 'test']),
 
     entry_points={
-        "console_scripts": ["skyline = skyline_client:main", "skymonitor = skyline_client:main"]
+        "console_scripts": ["skyline = skyline_client:main", "skymonitor = skyline_client:main",
+                            "skygather = skyline_client:gather_main"]
     },
 
     license='MIT',

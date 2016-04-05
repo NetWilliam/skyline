@@ -7,7 +7,6 @@ monkey.patch_all()
 import re
 import sys
 import time
-import os
 import subprocess
 from collections import deque, namedtuple
 from multiprocessing import Process
@@ -201,8 +200,7 @@ def filter_func(monitor_conf, warning_conf):
 
 
 def gather_func(monitor_conf):
-    dir = os.getcwd()
-    gather_dir = "%s/skyline_client/gather.py" % dir
+    gather_dir = "skygather"
     subprocess.call(["python", gather_dir, monitor_conf])
 
 

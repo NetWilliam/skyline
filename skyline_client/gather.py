@@ -5,7 +5,7 @@ import sys
 from public import configure, pubsub
 
 
-def gather_func(monitor_conf):
+def gather_func():
     if len(sys.argv) != 2:
         print "usage: python gather.py monitor.conf"
         exit(-1)

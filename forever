@@ -1,9 +1,0 @@
-#!/bin/bash
-while true; do
-    $@
-    if [[ $? == 0 ]]; then
-        exit -1
-    fi
-    echo Sleep 0.5 second
-    sleep 0.5
-done

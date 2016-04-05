@@ -201,7 +201,7 @@ def filter_func(monitor_conf, warning_conf):
 
 def gather_func(monitor_conf):
     gather_dir = "skygather"
-    subprocess.call(["python", gather_dir, monitor_conf])
+    subprocess.call([gather_dir, monitor_conf])
 
 
 def main():

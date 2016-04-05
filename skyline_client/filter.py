@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#! coding: utf-8
+# coding: utf-8
 
 import gevent
 from gevent import monkey
@@ -19,6 +19,7 @@ prefix_pubsub_dict = {}
 
 
 class MonitorWorker(object):
+
     def __init__(self, conf_dict, prefix_pubsub_dict):
         super(MonitorWorker, self).__init__()
         self._conf = conf_dict
@@ -206,7 +207,7 @@ def gather_func(monitor_conf):
 
 
 def main():
-    if len(sys.argv) >= 3:
+    if len(sys.argv) > 3:
         how_to_use()
     if len(sys.argv) != 3:
         monitor_conf = "conf/monitor.conf"
@@ -220,7 +221,7 @@ def main():
 
     p_gather.start()
     p_filter.start()
-    #TODO
+    # TODO
     # if any of this two threads quit, alert the warning and quit the whole program
     p_gather.join()
     p_filter.join()

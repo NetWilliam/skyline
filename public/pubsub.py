@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#! coding: utf-8
+# coding: utf-8
 
 import sys
 import os
@@ -10,13 +10,13 @@ import zmq.green as zmq
 
 
 MULTIPART = False
-DEFAULT_PATH = "/tmp/zero_message_queue"
 INPROC = "inproc://"
 IPC = "ipc://"
 TCP = "tcp://"
 
 
 class Pub(object):
+
     def __init__(self, ctx, bind_to=ZMQ_BIND_TO, multipart=MULTIPART):
         self._ctx = ctx
         self._socket = self._ctx.socket(zmq.PUB)
@@ -35,6 +35,7 @@ class Pub(object):
 
 
 class Sub(object):
+
     def __init__(self, ctx, connect_to=ZMQ_CONNECT_TO, multipart=MULTIPART):
         self._ctx = ctx
         self._socket = self._ctx.socket(zmq.SUB)
@@ -64,7 +65,8 @@ class PubSub(object):
     IPC: inter-process-communication at same host
     TCP: over tcp/ip network communication
     '''
-    def __init__(self, path=DEFAULT_PATH, proto_type=IPC, multipart=MULTIPART):
+
+    def __init__(self, path, proto_type=IPC, multipart=MULTIPART):
         self._ctx = zmq.Context()
         self.proto_type = proto_type
         if self.proto_type == IPC and not os.path.exists(path):

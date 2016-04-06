@@ -3,7 +3,8 @@
 
 import os
 import sys
-sys.path.append("/ect/skyline/")
+skyconf_dir = "/etc/skyline/"
+sys.path.append(os.path.abspath(skyconf_dir))
 
 DEBUG = False
 

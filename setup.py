@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 setup(
     name='skymonitor',
 
-    version='0.0.7',
+    version='0.0.8',
 
     description='skyline monitor',
     long_description=long_description,

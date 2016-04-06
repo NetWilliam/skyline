@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#! coding: utf-8
+# coding: utf-8
 
 import os
 import sys
@@ -8,11 +8,11 @@ sys.path.append("/ect/skyline/")
 DEBUG = False
 
 try:
-    from test_conf import * # noqa
+    # from test_conf import * # noqa
+    from online_conf import * # noqa
 except:
     raise Exception("Please configure /etc/skyline/ directory!")
-#from dev_conf import * # noqa
-#from online_conf import * # noqa
+# from dev_conf import * # noqa
 
 
 def get_email_list(alert_name):

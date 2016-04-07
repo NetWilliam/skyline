@@ -22,7 +22,7 @@ def color_print(str, bg, fg):
         if i == bg_e:
             print('\033[0m', end="")
         print(str[i], end="")
-    print('\033[0m')
+    print('\033[0m', end="")
 
 
 def do_match(match_str, pattern_obj):

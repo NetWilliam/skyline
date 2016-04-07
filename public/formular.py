@@ -1,3 +1,4 @@
+# coding: utf-8
 
 # -----------------------------------------------------------------------------
 # calc.py
@@ -52,7 +53,7 @@ def t_error(t):
 
 # Build the lexer
 import ply.lex as lex
-lexer = lex.lex()
+lexer = lex.lex(optimize=1, debug=False)
 
 # Parsing rules
 
@@ -140,7 +141,7 @@ def p_error(t):
     print("Syntax error at '%s'" % t.value)
 
 import ply.yacc as yacc
-parser = yacc.yacc()
+parser = yacc.yacc(write_tables=False, debug=False, outputdir="/tmp")
 
 
 def get_result():

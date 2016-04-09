@@ -115,6 +115,10 @@ _WarningSchema = {
 }
 
 
+def get_log_path(monitors):
+    return monitors[0]["log_file_path"]
+
+
 def get_monitors(conf_path):
     verify_monitor_conf(conf_path)
     monitors = []

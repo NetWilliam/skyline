@@ -4,13 +4,13 @@
 import re
 import time
 from collections import deque, namedtuple
-from public import pubsub, alert
+from public import alert, communicate
 from skyconf import get_email_list, get_phone_list, get_host_name, ALERT_URL
 
 
 class MonitorWorker(object):
 
-    def __init__(self, conf_dict, prefix_pubsub_dict):
+    def __init__(self, conf_dict):
         super(MonitorWorker, self).__init__()
         self._conf = conf_dict
         self._path = conf_dict["log_file_path"]
@@ -19,12 +19,11 @@ class MonitorWorker(object):
         self._prefix = conf_dict["prefix"]
         self.match_str = conf_dict["match_str"]
         self.pattern = re.compile(self.match_str)
-        self.sub = pubsub.PubSub(self._path,)
+        self.sub = communicate.MQReceiver(self._path, mq_model_type=communicate.PULL)
+        # self.sub = pubsub.PubSub(self._path,)
         print "mw path:", self._path
-        self.sub_idx = self.sub.create_sub()
-        self.pub = pubsub.PubSub(self._prefix, pubsub.INPROC, multipart=True)
-
-        prefix_pubsub_dict[self._prefix] = self.pub
+        # self.pub = pubsub.PubSub(self._prefix, pubsub.INPROC, multipart=True)
+        self.pub = communicate.MQSender(self._path+".filter", mq_model_type=communicate.PUSH, multipart=True)
 
         self._total = 0
         self._cnt = 0
@@ -36,7 +35,9 @@ class MonitorWorker(object):
     def work(self):
         print "MonitorWorker work start"
         while True:
-            log_message = self.sub.sub_message(self.sub_idx)
+            print "do receive a msg:"
+            log_message = self.sub.receive_message()
+            raise Exception("dxxxxxxxxxxxx")
             result = self.pattern.search(log_message)
             if not result:
                 continue
@@ -78,7 +79,7 @@ class MonitorWorker(object):
         message = [new_time, new_cycle_id, self._cnt, self._avg, self._cps]
         for i in xrange(len(message)):
             message[i] = "%s" % message[i]
-        self.pub.pub_message(message)
+        self.pub.send_message(message)
         self._cps = 0
         self._time = new_time
 
@@ -86,8 +87,9 @@ class MonitorWorker(object):
 class WarningWorker(object):
     CycleRecord = namedtuple("CycleRecord", ["cid", "warning_flag", "cnt", "avg", "cps"])
 
-    def __init__(self, conf_dict, prefix_pubsub_dict, alert_url=ALERT_URL):
+    def __init__(self, conf_dict, log_path, alert_url=ALERT_URL):
         super(WarningWorker, self).__init__()
+        self._path = log_path
         self._warning_name = conf_dict["warning_name"]
         self._formula = conf_dict["formula"]
         self._warning_filter = conf_dict["warning_filter"]
@@ -100,14 +102,12 @@ class WarningWorker(object):
         self.last_cid = 0
         self.alert_url = alert_url
 
-        def get_sub(token, prefix_pubsub_dict):
-            return prefix_pubsub_dict[token]
-        self.sub = get_sub(self._token, prefix_pubsub_dict)
-        self.sub_idx = self.sub.create_sub()
+        self.sub = communicate.MQReceiver(self._path+".filter", mq_model_type=communicate.PULL, multipart=True, bind_flag=True)
 
     def work(self):
         while True:
-            ts, cid, cnt, avg, cps = self.sub.sub_message(self.sub_idx)
+            ts, cid, cnt, avg, cps = self.sub.receive_message()
+            print "receive msg:", ts, cid, cnt, avg, cps
             ts = int(ts)
             cid = int(cid)
             cnt = float(cnt)
@@ -156,12 +156,9 @@ class WarningWorker(object):
         alert.send_alert(**params)
 
 
-def test_worker():
-    global prefix_pubsub_dict
-    print prefix_pubsub_dict
-    sub = prefix_pubsub_dict.values()[0]
-    idx = sub.create_sub()
+def test_worker(path):
     print "test_worker start"
+    sub = communicate.MQReceiver(path+".filter", multipart=True)
     while True:
-        msg = sub.sub_message(idx)
+        msg = sub.receive_message()
         print "test_worker recerive a msg:", msg

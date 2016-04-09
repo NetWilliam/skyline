@@ -5,11 +5,8 @@ import os
 import sys
 import hashlib
 sys.path.append("..")
-from skyconf import ZMQ_BIND_TO, ZMQ_CONNECT_TO # noqa
 import zmq
 
-
-MULTIPART = False
 
 PROC_TYPE_INPROC = "inproc://"  #local in-process (inter-thread) communication transport, see zmq_inproc(7)
 PROC_TYPE_IPC = "ipc://"        #local inter-process communication transport, see zmq_ipc(7)
@@ -24,22 +21,27 @@ PULL = zmq.PULL
 
 class MQ(object):
 
-    def __init__(self, addr, mq_model_type):
+    def __init__(self, addr, mq_model_type, bind_flag, connect_flag):
         self.addr = addr
 
         ctx = zmq.Context()
         self.socket = ctx.socket(mq_model_type)
+        if bind_flag:
+            self.socket.bind(self.addr)
+        if connect_flag:
+            self.socket.connect(self.addr)
 
 
 class MQSender(MQ):
 
-    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=PUB, multipart=MULTIPART):
+    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=PUB, bind_flag=True, connect_flag=False, multipart=False):
         self.path = path
         self.proto_type = proto_type
         self.multipart = multipart
         self.mq_model_type = mq_model_type
-        super(MQSender, self).__init__(self.get_addr_from_path(), mq_model_type)
-        self.socket.bind(self.addr)
+        self.addr = self.get_addr_from_path()
+        super(MQSender, self).__init__(self.addr, mq_model_type,
+                                       bind_flag, connect_flag)
 
     def send_message(self, message):
         if self.multipart:
@@ -48,25 +50,27 @@ class MQSender(MQ):
             self.socket.send(message)
 
     def get_addr_from_path(self):
-        if self.proto_type == PROC_TYPE_IPC and not os.path.exists(self.path):
+        if self.proto_type == PROC_TYPE_IPC and not os.path.exists(os.path.dirname(self.path)):
             raise Exception("Path:[%s] not exists!!" % self.path)
         addr = self.proto_type + self.path
         if self.proto_type != PROC_TYPE_TCP:
             addr_md5 = hashlib.md5(addr).hexdigest()
             addr = self.proto_type + "/tmp/" + addr_md5 + ".zmq"
+        print "send addr:", addr
         return addr
 
 
 class MQReceiver(MQ):
 
-    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=SUB, multipart=MULTIPART):
+    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=SUB, bind_flag=False, connect_flag=True, multipart=False):
         self.path = path
         self.proto_type = proto_type
         self.multipart = multipart
         self.mq_model_type = mq_model_type
         self.addr = self.get_addr_from_path()
-        super(MQReceiver, self).__init__(self.get_addr_from_path(), mq_model_type)
-        self.socket.connect(self.addr)
+        super(MQReceiver, self).__init__(self.addr, mq_model_type,
+                                         bind_flag, connect_flag)
+
         if self.mq_model_type == SUB:
             self.socket.setsockopt(zmq.SUBSCRIBE, "")
 
@@ -74,13 +78,15 @@ class MQReceiver(MQ):
         if self.multipart:
             return self.socket.recv_multipart()
         else:
+            print "in receive_message"
             return self.socket.recv()
 
     def get_addr_from_path(self):
-        if self.proto_type == PROC_TYPE_IPC and not os.path.exists(self.path):
+        if self.proto_type == PROC_TYPE_IPC and not os.path.exists(os.path.dirname(self.path)):
             raise Exception("Path:[%s] not exists!!" % self.path)
         addr = self.proto_type + self.path
         if self.proto_type != PROC_TYPE_TCP:
             addr_md5 = hashlib.md5(addr).hexdigest()
             addr = self.proto_type + "/tmp/" + addr_md5 + ".zmq"
+        print "recv addr:", addr
         return addr

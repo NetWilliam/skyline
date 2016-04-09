@@ -3,17 +3,14 @@
 
 import os
 import subprocess
-import gevent
-from gevent import monkey
-monkey.patch_all()
 import sys
 import signal
 from multiprocessing import Process
 from public import configure
-from worker import MonitorWorker, WarningWorker
+from worker import MonitorWorker, WarningWorker, test_worker
 
 
-prefix_pubsub_dict = {}
+PROCESS_NUM = 8
 
 
 def how_to_use():
@@ -21,24 +18,50 @@ def how_to_use():
     exit(-1)
 
 
+def tf():
+    '''
+    ppid = os.getppid()
+    try:
+        gather_dir = "skygather"
+        subprocess.call([gather_dir, monitor_conf])
+    finally:
+        os.kill(ppid, signal.SIGABRT)
+    '''
+    subprocess.call(["python", "test/com_gather_rcv.py"])
+
+
 def filter_func(monitor_conf, warning_conf):
     ppid = os.getppid()
     try:
         monitors = configure.get_monitors(monitor_conf)
         warnings = configure.get_warnings(warning_conf)
+
+        log_path = configure.get_log_path(monitors)
+
         mw_list = []
         ww_list = []
         for m in monitors:
-            mw_list.append(MonitorWorker(m, prefix_pubsub_dict))
+            mw_list.extend([MonitorWorker(m) for i in range(PROCESS_NUM)])
         for w in warnings:
-            ww_list.append(WarningWorker(w, prefix_pubsub_dict))
+            ww_list.append(WarningWorker(w, log_path))
 
-        jobs = [
-            gevent.spawn(mw.work) for mw in mw_list
-        ] + [
-            gevent.spawn(ww.work) for ww in ww_list
-        ]
-        gevent.joinall(jobs)
+        jobs = []
+        print "len(jobs):", len(jobs)
+        for mw in mw_list:
+            jobs += [Process(target=mw.work)]
+        print "len(jobs):", len(jobs)
+        for ww in ww_list:
+            jobs += [Process(target=ww.work)]
+        print "len(jobs):", len(jobs)
+        jobs += [Process(target=test_worker, args=(log_path, ))]
+        jobs += [Process(target=tf)]
+        print "len(jobs):", len(jobs)
+
+        for job in jobs:
+            job.start()
+        for job in jobs:
+            job.join()
+
     finally:
         os.kill(ppid, signal.SIGABRT)
 

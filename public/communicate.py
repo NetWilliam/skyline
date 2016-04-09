@@ -32,6 +32,7 @@ class MQSender(MQ):
         self.path = path
         self.proto_type = proto_type
         self.multipart = multipart
+        self.mq_model_type = mq_model_type
         super(MQSender, self).__init__(self.get_addr_from_path(), mq_model_type)
         self.socket.bind(self.addr)
 
@@ -57,13 +58,18 @@ class MQReceiver(MQ):
         self.path = path
         self.proto_type = proto_type
         self.multipart = multipart
+        self.mq_model_type = mq_model_type
+        self.addr = self.get_addr_from_path()
         super(MQReceiver, self).__init__(self.get_addr_from_path(), mq_model_type)
+        self.socket.connect(self.addr)
+        if self.mq_model_type == zmq.SUB:
+            self.socket.setsockopt(zmq.SUBSCRIBE, "")
 
-    def receive_message(self, message):
+    def receive_message(self):
         if self.multipart:
-            self.socket.send_multipart(message)
+            return self.socket.recv_multipart()
         else:
-            self.socket.send(message)
+            return self.socket.recv()
 
     def get_addr_from_path(self):
         if self.proto_type == PROC_TYPE_IPC and not os.path.exists(self.path):

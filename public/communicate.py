@@ -16,6 +16,11 @@ PROC_TYPE_IPC = "ipc://"        #local inter-process communication transport, se
 PROC_TYPE_TCP = "tcp://"        #unicast transport using TCP, see zmq_tcp(7)
 PROC_TYPE_PGM = "pgm://"        #reliable multicast transport using PGM, see zmq_pgm(7)
 
+PUB = zmq.PUB
+SUB = zmq.SUB
+PUSH = zmq.PUSH
+PULL = zmq.PULL
+
 
 class MQ(object):
 
@@ -28,7 +33,7 @@ class MQ(object):
 
 class MQSender(MQ):
 
-    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=zmq.PUB, multipart=MULTIPART):
+    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=PUB, multipart=MULTIPART):
         self.path = path
         self.proto_type = proto_type
         self.multipart = multipart
@@ -54,7 +59,7 @@ class MQSender(MQ):
 
 class MQReceiver(MQ):
 
-    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=zmq.SUB, multipart=MULTIPART):
+    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=SUB, multipart=MULTIPART):
         self.path = path
         self.proto_type = proto_type
         self.multipart = multipart
@@ -62,7 +67,7 @@ class MQReceiver(MQ):
         self.addr = self.get_addr_from_path()
         super(MQReceiver, self).__init__(self.get_addr_from_path(), mq_model_type)
         self.socket.connect(self.addr)
-        if self.mq_model_type == zmq.SUB:
+        if self.mq_model_type == SUB:
             self.socket.setsockopt(zmq.SUBSCRIBE, "")
 
     def receive_message(self):

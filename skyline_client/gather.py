@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import sys
-from public import configure, pubsub
+from public import configure, communicate
 
 
 def gather_func():
@@ -13,7 +13,7 @@ def gather_func():
     monitor_conf = sys.argv[1]
     conf = configure.get_monitors(monitor_conf)
     # 一定会有
-    pub_sub = pubsub.PubSub(conf[0]["log_file_path"])
+    pub_sub = communicate.MQSender(conf[0]["log_file_path"], mq_model_type=communicate.PUSH)
     file_watch = configure.FileWatcher(conf[0], pub_sub)
     file_watch.start_loop()
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#! coding: utf-8
+# coding: utf-8
 
 import os
 import re
@@ -11,6 +11,7 @@ from formular import lexer
 
 
 class MyEventHandler(pyinotify.ProcessEvent):
+
     def __init__(self, fw):
         super(MyEventHandler, self).__init__()
         self._file_watcher = fw
@@ -33,13 +34,14 @@ class MyEventHandler(pyinotify.ProcessEvent):
 
 
 class FileWatcher(object):
+
     def __init__(self, conf, pub):
         self._file_path = conf["log_file_path"]
         self._file_dir = os.path.dirname(self._file_path)
         self._file_name = os.path.basename(self._file_path)
         self._name_prefix = conf["log_name_prefix"]
         self._pub = pub
-        #self._msg_head = hashlib.md5(self._file_path).hexdigest()
+        # self._msg_head = hashlib.md5(self._file_path).hexdigest()
         self._msg_head = ""
 
     def _set_loop_opt(self):
@@ -70,7 +72,7 @@ class FileWatcher(object):
         self._notifier.loop()
 
     def pub_message(self, message):
-        self._pub.pub_message(self._msg_head + message)
+        self._pub.send_message(self._msg_head + message)
 
 
 _MonitorSchema = {

@@ -21,11 +21,14 @@ PULL = zmq.PULL
 
 class MQ(object):
 
-    def __init__(self, addr, mq_model_type, bind_flag, connect_flag):
+    def __init__(self, addr, mq_model_type, bind_flag, connect_flag, ctx):
         self.addr = addr
 
-        ctx = zmq.Context()
-        self.socket = ctx.socket(mq_model_type)
+        if ctx is None:
+            self.ctx = zmq.Context()
+        else:
+            self.ctx = ctx
+        self.socket = self.ctx.socket(mq_model_type)
         if bind_flag:
             self.socket.bind(self.addr)
         if connect_flag:
@@ -34,14 +37,15 @@ class MQ(object):
 
 class MQSender(MQ):
 
-    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=PUB, bind_flag=True, connect_flag=False, multipart=False):
+    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=PUB, bind_flag=True, connect_flag=False, multipart=False, ctx=None):
         self.path = path
         self.proto_type = proto_type
         self.multipart = multipart
         self.mq_model_type = mq_model_type
         self.addr = self.get_addr_from_path()
         super(MQSender, self).__init__(self.addr, mq_model_type,
-                                       bind_flag, connect_flag)
+                                       bind_flag, connect_flag,
+                                       ctx)
 
     def send_message(self, message):
         if self.multipart:
@@ -56,20 +60,20 @@ class MQSender(MQ):
         if self.proto_type != PROC_TYPE_TCP:
             addr_md5 = hashlib.md5(addr).hexdigest()
             addr = self.proto_type + "/tmp/" + addr_md5 + ".zmq"
-        print "send addr:", addr
         return addr
 
 
 class MQReceiver(MQ):
 
-    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=SUB, bind_flag=False, connect_flag=True, multipart=False):
+    def __init__(self, path, proto_type=PROC_TYPE_IPC, mq_model_type=SUB, bind_flag=False, connect_flag=True, multipart=False, ctx=None):
         self.path = path
         self.proto_type = proto_type
         self.multipart = multipart
         self.mq_model_type = mq_model_type
         self.addr = self.get_addr_from_path()
         super(MQReceiver, self).__init__(self.addr, mq_model_type,
-                                         bind_flag, connect_flag)
+                                         bind_flag, connect_flag,
+                                         ctx)
 
         if self.mq_model_type == SUB:
             self.socket.setsockopt(zmq.SUBSCRIBE, "")
@@ -78,7 +82,6 @@ class MQReceiver(MQ):
         if self.multipart:
             return self.socket.recv_multipart()
         else:
-            print "in receive_message"
             return self.socket.recv()
 
     def get_addr_from_path(self):
@@ -88,5 +91,4 @@ class MQReceiver(MQ):
         if self.proto_type != PROC_TYPE_TCP:
             addr_md5 = hashlib.md5(addr).hexdigest()
             addr = self.proto_type + "/tmp/" + addr_md5 + ".zmq"
-        print "recv addr:", addr
         return addr

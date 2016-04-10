@@ -7,7 +7,6 @@ import sys
 import signal
 from multiprocessing import Process
 from public import configure
-from worker import MonitorWorker, WarningWorker, test_worker
 
 
 PROCESS_NUM = 8
@@ -18,16 +17,22 @@ def how_to_use():
     exit(-1)
 
 
-def tf():
-    '''
+def monitor_worker_func(monitor_conf, monitor_idx):
     ppid = os.getppid()
     try:
-        gather_dir = "skygather"
-        subprocess.call([gather_dir, monitor_conf])
+        gather_dir = "/home/liuweibo/skyline/skyline_client/monitor_worker.py"
+        subprocess.call(["python", gather_dir, monitor_conf, "%s" % monitor_idx])
     finally:
         os.kill(ppid, signal.SIGABRT)
-    '''
-    subprocess.call(["python", "test/com_gather_rcv.py"])
+
+
+def warning_worker_func(warning_conf, log_path, warning_idx):
+    ppid = os.getppid()
+    try:
+        gather_dir = "/home/liuweibo/skyline/skyline_client/warning_worker.py"
+        subprocess.call(["python", gather_dir, warning_conf, log_path, "%s" % warning_idx])
+    finally:
+        os.kill(ppid, signal.SIGABRT)
 
 
 def filter_func(monitor_conf, warning_conf):
@@ -40,22 +45,12 @@ def filter_func(monitor_conf, warning_conf):
 
         mw_list = []
         ww_list = []
-        for m in monitors:
-            mw_list.extend([MonitorWorker(m) for i in range(PROCESS_NUM)])
-        for w in warnings:
-            ww_list.append(WarningWorker(w, log_path))
+        for i in range(len(monitors)):
+            mw_list.extend([Process(target=monitor_worker_func, args=(monitor_conf, i)) for x in range(PROCESS_NUM)])
+        for i in range(len(warnings)):
+            ww_list.append(Process(target=warning_worker_func, args=(warning_conf, log_path, i)))
 
-        jobs = []
-        print "len(jobs):", len(jobs)
-        for mw in mw_list:
-            jobs += [Process(target=mw.work)]
-        print "len(jobs):", len(jobs)
-        for ww in ww_list:
-            jobs += [Process(target=ww.work)]
-        print "len(jobs):", len(jobs)
-        jobs += [Process(target=test_worker, args=(log_path, ))]
-        jobs += [Process(target=tf)]
-        print "len(jobs):", len(jobs)
+        jobs = mw_list + ww_list
 
         for job in jobs:
             job.start()
@@ -69,8 +64,10 @@ def filter_func(monitor_conf, warning_conf):
 def gather_func(monitor_conf):
     ppid = os.getppid()
     try:
-        gather_dir = "skygather"
-        subprocess.call([gather_dir, monitor_conf])
+        # gather_dir = "skygather"
+        # TODO: fix when release
+        # subprocess.call([gather_dir, monitor_conf])
+        subprocess.call(["python", "/home/liuweibo/skyline/skyline_client/gather.py", monitor_conf])
     finally:
         os.kill(ppid, signal.SIGABRT)
 

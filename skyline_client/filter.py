@@ -20,7 +20,17 @@ def how_to_use():
 def monitor_worker_func(monitor_conf, monitor_idx):
     ppid = os.getppid()
     try:
+        # TODO
         gather_dir = "/home/liuweibo/skyline/skyline_client/monitor_worker.py"
+        subprocess.call(["python", gather_dir, monitor_conf, "%s" % monitor_idx])
+    finally:
+        os.kill(ppid, signal.SIGABRT)
+
+
+def summary_worker_func(monitor_conf, monitor_idx):
+    ppid = os.getppid()
+    try:
+        gather_dir = "/home/liuweibo/skyline/skyline_client/summary_worker.py"
         subprocess.call(["python", gather_dir, monitor_conf, "%s" % monitor_idx])
     finally:
         os.kill(ppid, signal.SIGABRT)
@@ -47,6 +57,7 @@ def filter_func(monitor_conf, warning_conf):
         ww_list = []
         for i in range(len(monitors)):
             mw_list.extend([Process(target=monitor_worker_func, args=(monitor_conf, i)) for x in range(PROCESS_NUM)])
+            mw_list.append(Process(target=summary_worker_func, args=(monitor_conf, i)))
         for i in range(len(warnings)):
             ww_list.append(Process(target=warning_worker_func, args=(warning_conf, log_path, i)))
 

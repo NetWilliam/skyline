@@ -21,7 +21,7 @@ class MonitorWorker(object):
         self.pattern = re.compile(self.match_str)
         self.sub = communicate.MQReceiver(self._path, mq_model_type=communicate.PULL)
         print "mw path:", self._path
-        self.pub = communicate.MQSender(self._path+".filter", mq_model_type=communicate.PUSH, multipart=True, ctx=self.sub.ctx, bind_flag=False, connect_flag=True)
+        self.pub = communicate.MQSender(self._path+".filter", mq_model_type=communicate.PUSH, ctx=self.sub.ctx, bind_flag=False, connect_flag=True)
 
         self._total = 0
         self._cnt = 0
@@ -36,6 +36,7 @@ class MonitorWorker(object):
             log_message = self.sub.receive_message()
             result = self.pattern.search(log_message)
             if not result:
+                # cannot match
                 continue
             if result.groups():
                 result = result.group(1)
@@ -48,6 +49,32 @@ class MonitorWorker(object):
                 number = 0
             if self._threshold is not None and number < self._threshold:
                 continue
+            self.pub.send_message("%s" % number)
+
+
+class SummaryWorker(object):
+
+    def __init__(self, conf_dict):
+        super(SummaryWorker, self).__init__()
+        self._conf = conf_dict
+        self._path = conf_dict["log_file_path"]
+        self._cycle = conf_dict["cycle"]
+        self._prefix = conf_dict["prefix"]
+        self.match_str = conf_dict["match_str"]
+        self.sub = communicate.MQReceiver(self._path+".filter", mq_model_type=communicate.PULL, bind_flag=True, connect_flag=False)
+        self.pub = communicate.MQSender(self._path+".sum", multipart=True)
+
+        self._total = 0
+        self._cnt = 0
+        self._avg = 0
+        self._cps = 0
+        self._time = int(time.time())
+        self._cycle_id = int(time.time() / self._cycle)
+
+    def work(self):
+        while True:
+            number = self.sub.receive_message()
+            print number
             self.process_new_record(number)
 
     def process_new_record(self, rec):
@@ -80,18 +107,6 @@ class MonitorWorker(object):
         self._time = new_time
 
 
-class SummaryWorker(object):
-
-    def __(self, conf_dict, log_path):
-        super(SummaryWorker, self).__init__()
-        self.log_path = log_path
-        self.sub = communicate.MQReceiver(self._path+".filter", mq_model_type=communicate.PULL, multipart=True, bind_flag=True, connect_flag=False)
-
-    def work(self):
-        while True:
-            ts, cid, cnt, avg, cps = self.sub.receive_message()
-
-
 class WarningWorker(object):
     CycleRecord = namedtuple("CycleRecord", ["cid", "warning_flag", "cnt", "avg", "cps"])
 
@@ -110,7 +125,7 @@ class WarningWorker(object):
         self.last_cid = 0
         self.alert_url = alert_url
 
-        self.sub = communicate.MQReceiver(self._path+".filter", mq_model_type=communicate.PULL, multipart=True, bind_flag=True, connect_flag=False)
+        self.sub = communicate.MQReceiver(self._path+".sum", multipart=True)
 
     def work(self):
         while True:

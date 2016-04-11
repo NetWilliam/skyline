@@ -169,7 +169,6 @@ def verify_monitor_conf(conf_path):
                 items.append(item_name_prefix)
             name = log_name_prefix + "_" + item_name_prefix
             variable_list.append(name)
-        print "monitor verify done"
         return variable_list
 
 

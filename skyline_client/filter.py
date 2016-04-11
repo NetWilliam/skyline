@@ -7,6 +7,7 @@ import sys
 import signal
 from multiprocessing import Process
 from public import configure
+from skyconf import DEBUG
 
 
 PROCESS_NUM = 8
@@ -20,9 +21,12 @@ def how_to_use():
 def monitor_worker_func(monitor_conf, monitor_idx):
     ppid = os.getppid()
     try:
-        # TODO
-        gather_dir = "/home/liuweibo/skyline/skyline_client/monitor_worker.py"
-        subprocess.call(["python", gather_dir, monitor_conf, "%s" % monitor_idx])
+        if DEBUG:
+            script_dir = "/home/liuweibo/skyline/skyline_client/monitor_worker.py"
+            subprocess.call(["python", script_dir, monitor_conf, "%s" % monitor_idx])
+        else:
+            command = "skymonitor_worker"
+            subprocess.call([command, monitor_conf, "%s" % monitor_idx])
     finally:
         os.kill(ppid, signal.SIGABRT)
 
@@ -30,8 +34,12 @@ def monitor_worker_func(monitor_conf, monitor_idx):
 def summary_worker_func(monitor_conf, monitor_idx):
     ppid = os.getppid()
     try:
-        gather_dir = "/home/liuweibo/skyline/skyline_client/summary_worker.py"
-        subprocess.call(["python", gather_dir, monitor_conf, "%s" % monitor_idx])
+        if DEBUG:
+            script_dir = "/home/liuweibo/skyline/skyline_client/summary_worker.py"
+            subprocess.call(["python", script_dir, monitor_conf, "%s" % monitor_idx])
+        else:
+            command = "skysummary_worker"
+            subprocess.call([command, monitor_conf, "%s" % monitor_idx])
     finally:
         os.kill(ppid, signal.SIGABRT)
 
@@ -39,8 +47,12 @@ def summary_worker_func(monitor_conf, monitor_idx):
 def warning_worker_func(warning_conf, log_path, warning_idx):
     ppid = os.getppid()
     try:
-        gather_dir = "/home/liuweibo/skyline/skyline_client/warning_worker.py"
-        subprocess.call(["python", gather_dir, warning_conf, log_path, "%s" % warning_idx])
+        if DEBUG:
+            script_dir = "/home/liuweibo/skyline/skyline_client/warning_worker.py"
+            subprocess.call(["python", script_dir, warning_conf, log_path, "%s" % warning_idx])
+        else:
+            command = "skywarning_worker"
+            subprocess.call([command, warning_conf, log_path, "%s" % warning_idx])
     finally:
         os.kill(ppid, signal.SIGABRT)
 

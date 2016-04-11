@@ -23,7 +23,7 @@ def do_write():
     59.38.247.188 08/Apr/2016:18:11:58 +0800 "GET /v2/ad/show.json?sk=7JBKvlo4QWqkjHtvQUB-wA&height=1920&api_key=07e72bef932537c71f9cafbe4c94df1c&width=1080&origin=android&api_sign=8bb8c2d583637fc28731904f9604e659&supported_types=1&version=138&slot_name=homepage_banner_ad2& HTTP/1.1" 200 349 "-" "-" 0.006 0.006 127.0.1.1:8903\n'''
     global file_des
     print "do_write was call, ", time.time()
-    for i in xrange(1, 2):
+    for i in xrange(1, 400):
         file_des.write(log_str)
     t = Timer(1, do_write)
     print "do_write done:", time.time()

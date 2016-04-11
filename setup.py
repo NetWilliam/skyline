@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 setup(
     name='skymonitor',
 
-    version='0.0.10',
+    version='0.0.11',
 
     description='skyline monitor',
     long_description=long_description,
@@ -27,7 +27,10 @@ setup(
 
     entry_points={
         "console_scripts": ["skyline = skyline_client:main", "skymonitor = skyline_client:main",
-                            "skygather = skyline_client:gather_main"]
+                            "skygather = skyline_client:gather_main",
+                            "skymonitor_worker = skyline_client:monitor_worker_main",
+                            "skysummary_worker = skyline_client:summary_worker_main",
+                            "skywarning_worker = skyline_client:warning_worker_main"]
     },
 
     license='MIT',

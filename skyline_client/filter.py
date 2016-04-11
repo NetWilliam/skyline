@@ -87,10 +87,13 @@ def filter_func(monitor_conf, warning_conf):
 def gather_func(monitor_conf):
     ppid = os.getppid()
     try:
-        # gather_dir = "skygather"
-        # TODO: fix when release
-        # subprocess.call([gather_dir, monitor_conf])
-        subprocess.call(["python", "/home/liuweibo/skyline/skyline_client/gather.py", monitor_conf])
+        if DEBUG:
+            script_dir = "/home/liuweibo/skyline/skyline_client/gather.py"
+            subprocess.call(["python", script_dir, monitor_conf])
+        else:
+            command = "skygather"
+            subprocess.call([command, monitor_conf])
+
     finally:
         os.kill(ppid, signal.SIGABRT)
 

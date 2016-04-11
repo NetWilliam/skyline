@@ -117,6 +117,8 @@ class WarningWorker(object):
         self._denominator = conf_dict["denominator"]
         self._alert_name = conf_dict["alert_name"]
         # only one token at one time
+        # TODO: hard coding
+        # FIXME: hard coding
         self._token = conf_dict["tokens"][:-4]
         self.warning_queue = deque(maxlen=self._denominator)
         self.last_cid = 0
@@ -127,7 +129,7 @@ class WarningWorker(object):
     def work(self):
         while True:
             ts, cid, cnt, avg, cps = self.sub.receive_message()
-# TODO
+            # TODO
             print "receive msg:", ts, cid, cnt, avg, cps
             ts = int(ts)
             cid = int(cid)

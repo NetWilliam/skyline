@@ -2,7 +2,15 @@
 # coding: utf-8
 
 import sys
+import subprocess
 from public import configure, communicate
+
+
+def watch_file(file_path, messenger):
+    proc = subprocess.Popen(["tail", "-F", "-f", file_path], stdout=subprocess.PIPE)
+    while True:
+        msg = proc.stdout.readline()
+        messenger.send_message(msg)
 
 
 def gather_func():
@@ -13,9 +21,8 @@ def gather_func():
     monitor_conf = sys.argv[1]
     conf = configure.get_monitors(monitor_conf)
     # 一定会有
-    pub_sub = communicate.MQSender(conf[0]["log_file_path"], mq_model_type=communicate.PUSH)
-    file_watch = configure.FileWatcher(conf[0], pub_sub)
-    file_watch.start_loop()
+    messenger = communicate.MQSender(conf[0]["log_file_path"], mq_model_type=communicate.PUSH)
+    watch_file(conf[0]["log_file_path"], messenger)
 
 
 if __name__ == "__main__":

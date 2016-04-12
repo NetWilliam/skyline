@@ -32,7 +32,8 @@ setup(
                             "skymonitor_worker = skyline_client:monitor_worker_main",
                             "skysummary_worker = skyline_client:summary_worker_main",
                             "skywarning_worker = skyline_client:warning_worker_main",
-                            "skyverify = skyline_client:verify_main"]
+                            "skyverify = skyline_client:verify_main",
+                            "skymatcher = skyline_client:matcher_main"]
     },
 
     license='MIT',

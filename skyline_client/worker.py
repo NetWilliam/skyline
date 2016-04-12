@@ -176,7 +176,10 @@ class WarningWorker(object):
             "email_addrs": email_list
         }
 
-        alert.send_alert(**params)
+        try:
+            alert.send_alert(**params)
+        except Exception as e:
+            print "error when sending alert:", e
 
 
 def test_worker(path):

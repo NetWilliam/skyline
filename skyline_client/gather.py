@@ -7,7 +7,7 @@ from public import configure, communicate
 
 
 def watch_file(file_path, messenger):
-    proc = subprocess.Popen(["tail", "-F", "-f", file_path], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["tail", "--retry", "-F", file_path], stdout=subprocess.PIPE)
     while True:
         msg = proc.stdout.readline()
         messenger.send_message(msg)
